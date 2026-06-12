@@ -8,8 +8,11 @@ import (
 )
 
 func main() {
+	log.Println("start init")
 	rnn := rnnoise.NewRNNoise()
 	defer rnn.Close()
+
+	log.Println("init done")
 
 	bitsPCM, err := os.ReadFile("stereo_48k.pcm")
 	if err != nil {
