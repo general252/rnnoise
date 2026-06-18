@@ -6,6 +6,7 @@ package rnnoise
 import "C"
 import (
 	"fmt"
+	"log"
 	"sync"
 	"unsafe"
 )
@@ -22,6 +23,10 @@ func NewRNNoise() *RNNoise {
 }
 
 func (rnn *RNNoise) Close() {
+	if rnn == nil {
+		log.Println("rnn is nil")
+		return
+	}
 	rnn.mux.Lock()
 	defer rnn.mux.Unlock()
 
@@ -40,6 +45,10 @@ func (rnn *RNNoise) Close() {
 //
 // 注意: 输入帧必须恰好包含480个样本，对应48kHz采样率下的10毫秒音频
 func (rnn *RNNoise) ProcessFrame(frame []float32) (float32, []float32, error) {
+	if rnn == nil {
+		log.Println("rnn is nil")
+		return 0, nil, fmt.Errorf("rnn is nil")
+	}
 	rnn.mux.Lock()
 	defer rnn.mux.Unlock()
 
