@@ -6,11 +6,13 @@ package rnnoise
 import "C"
 import (
 	"fmt"
+	"sync"
 	"unsafe"
 )
 
 type RNNoise struct {
 	state *C.DenoiseState
+	mux   sync.Mutex
 }
 
 func NewRNNoise() *RNNoise {
@@ -20,6 +22,9 @@ func NewRNNoise() *RNNoise {
 }
 
 func (rnn *RNNoise) Close() {
+	rnn.mux.Lock()
+	defer rnn.mux.Unlock()
+
 	C.rnnoise_destroy(rnn.state)
 }
 
@@ -35,6 +40,9 @@ func (rnn *RNNoise) Close() {
 //
 // 注意: 输入帧必须恰好包含480个样本，对应48kHz采样率下的10毫秒音频
 func (rnn *RNNoise) ProcessFrame(frame []float32) (float32, []float32, error) {
+	rnn.mux.Lock()
+	defer rnn.mux.Unlock()
+
 	if len(frame) != 480 {
 		return 0, nil, fmt.Errorf("帧大小必须为480个样本（10ms @ 48kHz），当前为%d", len(frame))
 	}
